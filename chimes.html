@@ -1,66 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>three.js webaudio - timing</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<style>
-			body {
-				background:#777;
-				padding:0;
-				margin:0;
-				overflow:hidden;
-				font-family: Monospace;
-			}
-			a {
-				color: #ffffff;
-			}
-			#overlay {
-				position: absolute;
-				z-index: 1;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height:100%;
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				opacity: 1;
-				background-color: #000000;
-				color: #ffffff;
-			}
-			#overlay > div {
-				text-align: center;
-			}
-			#overlay > div > button {
-				height: 20px;
-				width: 100px;
-				background: transparent;
-				color: #ffffff;
-				outline: 1px solid #ffffff;
-				border: 0px;
-				cursor: pointer;
-			}
-			#overlay > div > p {
-				color: #777777;
-				font-size: 12px;
-			}
-		</style>
-
-        <script src="chimes.js"></script>
-		<script src="three.js"></script>
-		<script src="js/WebGL.js"></script>
-		<script src="js/controls/OrbitControls.js"></script>
-        <script src="js/libs/ammo.js"></script>
-
-	</head>
-<body>
-
-	<div id="overlay">
-		<div>
-			<button id="startButton" onclick="init()">Click to Play</button>
-		</div>
-	</div>
-	<div id="container"></div>
-</body>
+    <head>
+        <title>three.js webaudio - timing</title>
+        <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+                <style>
+                    body {
+                        background:#777;
+                        padding:0;
+                        margin:0;
+                        overflow:hidden;
+                        font-family: Monospace;
+                    }
+                a {
+                    color: #ffffff;
+                }
+                #overlay {
+                    position: absolute;
+                    z-index: 1;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height:100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    opacity: 1;
+                    background-color: #000000;
+                    color: #ffffff;
+                }
+                #overlay > div {
+                    text-align: center;
+                }
+                #overlay > div > button {
+                    height: 20px;
+                    width: 100px;
+                    background: transparent;
+                    color: #ffffff;
+                    outline: 1px solid #ffffff;
+                    border: 0px;
+                    cursor: pointer;
+                }
+                #overlay > div > p {
+                    color: #777777;
+                    font-size: 12px;
+                }
+                </style>
+                
+                <script src="chimes.js"></script>
+                <script src="three.js"></script>
+                <script src="js/WebGL.js"></script>
+                <script src="js/controls/OrbitControls.js"></script>
+                <script src="js/libs/ammo.js"></script>
+                <script src="js/libs/stats.min.js"></script>
+                
+                
+                
+                </head>
+    <body>
+        
+        <div id="overlay">
+            <div>
+                <button id="startButton" onclick="init()">Click to Play</button>
+            </div>
+        </div>
+        <div id="container">
+            <div style="background-color:#000;">
+                <div class="inline" style="float: left;">
+                    <p style="text-align:center;">Wind Strength</p>
+                    <input style="padding-left: 20px;" type="range" min="0" max="100" value="0" step="1" id="windStrength">
+                </div>
+                <div class="inline" style="float: right;">
+                    <p style="text-align:center;">Time of Day</p>
+                    <input style="padding-right: 10px;" type="range" min="0" max="12" value="12" step="1" id="time" onchange="updateLight()">
+                </div>
+            <div>
+        </div>
+    </body>
 </html>
