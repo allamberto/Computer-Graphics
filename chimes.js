@@ -35,6 +35,7 @@ var controls;
 var directionalLight;
 
 var audioLoader, listner;
+var audio1, audio2, audio3, audio4; 
 
 function init() {
     clock = new THREE.Clock();
@@ -61,12 +62,12 @@ function init() {
     directionalLight.position.copy(new THREE.Vector3(70, 40, 50));
     directionalLight.castShadow = true;
     directionalLight.shadowCameraVisible = false;
-    directionalLight.shadowCameraNear = 25;
-    directionalLight.shadowCameraFar = 200;
-    directionalLight.shadowCameraLeft = -50;
-    directionalLight.shadowCameraRight = 50;
-    directionalLight.shadowCameraTop = 50;
-    directionalLight.shadowCameraBottom = -50;
+    directionalLight.shadow.camera.near= 25;
+    directionalLight.shadow.camera.far = 200;
+    directionalLight.shadow.camera.left = -50;
+    directionalLight.shadow.camera.right = 50;
+    directionalLight.shadow.camera.top = 50;
+    directionalLight.shadow.camera.bottom = -50;
     directionalLight.visible = true;
     directionalLight.name = 'dirLight';
     scene.add(directionalLight);
@@ -78,6 +79,7 @@ function init() {
     initInput();
     
     //TODO: Add Audio
+    
     
     // Renderer
     renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -129,6 +131,7 @@ function createObjects(){
     audioLoader = new THREE.AudioLoader();
     listener = new THREE.AudioListener();
     camera.add( listener );
+     
     
     // Ground
     pos.set( 0, - 0.5, 0 );
@@ -286,6 +289,7 @@ function createObjects(){
     quat.set( 0, 0, 0, 1 );
     createRigidBody( ball, ballShape, ballMass, pos, quat );
     ball.userData.physicsBody.setFriction( 0.5 );
+    console.log(rigidBodies.length)
     
     // Attach Rope 6 and Topper
     var influence = 1;
@@ -334,9 +338,6 @@ function createObjects(){
     ropeSoftBody.setActivationState( 4 );
     
     // Left Chime -> Chime 1
-    
-    
-    audioLoader.load( 'sounds/chime1.mp3', function ( buffer ) {
     var chimeMass1 = 2.7;
     chime1 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 2.6, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
     chime1.castShadow = true;
@@ -347,17 +348,12 @@ function createObjects(){
     quat.set( 0, 0, 0, 1 );
     createRigidBody( chime1, chimeShape1, chimeMass1, pos, quat );
     chime1.userData.physicsBody.setFriction( 0.5 );
-                     
-    var audio = new THREE.PositionalAudio( listener );
-    audio.setBuffer( buffer );
-    chime1.add( audio );
-    
+
     // Attach Rope 2 and Topper
     var influence = 1;
     ropeSoftBody.appendAnchor( 0, chime1.userData.physicsBody, true, influence );
     ropeSoftBody.appendAnchor( ropeNumSegments, topper.userData.physicsBody, true, influence );
-    
-                     });
+               
     
     // Right Chime Rope -> Rope 3
     ropeLength = .8;
@@ -398,7 +394,7 @@ function createObjects(){
     ropeSoftBody.setActivationState( 4 );
     
     // Right Chime -> Chime 2
-    
+
     var chimeMass2 = 2;
     chime2 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 2.3, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
     chime2.castShadow = true;
@@ -409,12 +405,11 @@ function createObjects(){
     quat.set( 0, 0, 0, 1 );
     createRigidBody( chime2, chimeShape2, chimeMass2, pos, quat );
     chime2.userData.physicsBody.setFriction( 0.5 );
-    
+
     // Attach Rope 3 and Topper
     var influence = 1;
     ropeSoftBody.appendAnchor( 0, chime2.userData.physicsBody, true, influence );
     ropeSoftBody.appendAnchor( ropeNumSegments, topper.userData.physicsBody, true, influence );
-                     
     
     // Top Chime Rope -> Rope 4
     
@@ -458,7 +453,7 @@ function createObjects(){
     ropeSoftBody.setActivationState( 4 );
     
     // Top Chime -> Chime 3
-    
+
     var chimeMass3 = 2.9;
     chime3 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 3.8, 3.8), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
     chime3.castShadow = true;
@@ -469,12 +464,11 @@ function createObjects(){
     quat.set( 0, 0, 0, 1 );
     createRigidBody( chime3, chimeShape3, chimeMass3, pos, quat );
     chime3.userData.physicsBody.setFriction( 0.5 );
-    
+
     // Attach Rope 2 and Topper
     var influence = 1;
-    //ropeSoftBody.appendAnchor( 0, chime3.userData.physicsBody, true, influence );
+    ropeSoftBody.appendAnchor( 0, chime3.userData.physicsBody, true, influence );
     ropeSoftBody.appendAnchor( ropeNumSegments, topper.userData.physicsBody, true, influence );
-    
     // Bottomm Chime Rope -> Rope 5
     
     ropeLength = .8;
@@ -530,11 +524,31 @@ function createObjects(){
     createRigidBody( chime4, chimeShape4, chimeMass4, pos, quat );
     chime4.userData.physicsBody.setFriction( 0.5 );
     
+    
     // Attach Rope 2 and Topper
     var influence = 1;
     ropeSoftBody.appendAnchor( 0, chime4.userData.physicsBody, true, influence );
     ropeSoftBody.appendAnchor( ropeNumSegments, topper.userData.physicsBody, true, influence );
-
+    audioLoader.load( 'sounds/chime1.ogg', function ( buffer ) {
+        audio1 = new THREE.PositionalAudio( listener );
+        audio1.setBuffer( buffer );
+        chime1.add( audio1 );
+    });
+    audioLoader.load( 'sounds/chime2.ogg', function ( buffer ) {
+        audio2 = new THREE.PositionalAudio( listener );
+        audio2.setBuffer( buffer );
+        chime2.add( audio2 );
+    });
+    audioLoader.load( 'sounds/chime3.ogg', function ( buffer ) {
+        audio3 = new THREE.PositionalAudio( listener );
+        audio3.setBuffer( buffer );
+        chime3.add( audio3 );
+    });
+    audioLoader.load( 'sounds/chime4.ogg', function ( buffer ) {
+        audio4 = new THREE.PositionalAudio( listener );
+        audio4.setBuffer( buffer );
+        chime4.add( audio4 );
+    });
 }
 
 // Taken from three.JS Physics Rope Example
@@ -575,16 +589,12 @@ function animate() {
 }
 
 function render() {
-    var deltaTime = clock.getDelta();
-    updatePhysics( deltaTime );
-    
-	//renderer.render( scene, camera );
     document.body.onkeyup = function(e){
         if (e.keyCode === 32 || e.key === ' '){
             // TODO: Add Wind
-            //var windStrength = document.getElementById("windStrength").value;
-
-
+            
+            var windStrength = document.getElementById("windStrength").value;
+            
             //topper.rotation.x = .2;
         }
     }
@@ -623,28 +633,39 @@ function initInput() {
 }
 
 function updatePhysics( deltaTime ) {
- var ropePositions = topRope.geometry.attributes.position.array;
- var ropePositions1 = rope2.geometry.attributes.position.array;
- var ropePositions2 = rope3.geometry.attributes.position.array;
- var ropePositions3 = rope4.geometry.attributes.position.array;
- var ropePositions4 = rope5.geometry.attributes.position.array;
- var ropePositions5 = rope6.geometry.attributes.position.array;
-    
- var numVerts = ropePositions.length / 3;
- var numVerts1 = ropePositions1.length / 3;
- var numVerts2 = ropePositions2.length / 3;
- var numVerts3 = ropePositions3.length / 3;
- var numVerts4 = ropePositions4.length / 3;
- var numVerts5 = ropePositions5.length / 3;
-    
- var nodes = softBody.get_m_nodes();
- var nodes1 = softBody1.get_m_nodes();
- var nodes2 = softBody2.get_m_nodes();
- var nodes3 = softBody3.get_m_nodes();
- var nodes4 = softBody4.get_m_nodes();
- var nodes5 = softBody5.get_m_nodes();
- 
-var indexFloat = 0;
+    physicsWorld.stepSimulation( deltaTime, 10 );
+    // Hinge control
+    hinge.enableAngularMotor( true, 1.5 * armMovement, 50 );
+    // Update rope
+    var softBody = topRope.userData.physicsBody;
+    var softBody1 = rope2.userData.physicsBody;
+    var softBody2 = rope3.userData.physicsBody;
+    var softBody3 = rope4.userData.physicsBody;
+    var softBody4 = rope5.userData.physicsBody;
+    var softBody5 = rope6.userData.physicsBody;
+
+    var ropePositions = topRope.geometry.attributes.position.array;
+    var ropePositions1 = rope2.geometry.attributes.position.array;
+    var ropePositions2 = rope3.geometry.attributes.position.array;
+    var ropePositions3 = rope4.geometry.attributes.position.array;
+    var ropePositions4 = rope5.geometry.attributes.position.array;
+    var ropePositions5 = rope6.geometry.attributes.position.array;
+
+    var numVerts = ropePositions.length / 3;
+    var numVerts1 = ropePositions1.length / 3;
+    var numVerts2 = ropePositions2.length / 3;
+    var numVerts3 = ropePositions3.length / 3;
+    var numVerts4 = ropePositions4.length / 3;
+    var numVerts5 = ropePositions5.length / 3;
+
+    var nodes = softBody.get_m_nodes();
+    var nodes1 = softBody1.get_m_nodes();
+    var nodes2 = softBody2.get_m_nodes();
+    var nodes3 = softBody3.get_m_nodes();
+    var nodes4 = softBody4.get_m_nodes();
+    var nodes5 = softBody5.get_m_nodes();
+
+    var indexFloat = 0;
     for ( var i = 0; i < numVerts; i ++ ) {
         var node = nodes.at( i );
         var nodePos = node.get_m_x();
@@ -652,13 +673,14 @@ var indexFloat = 0;
         ropePositions[ indexFloat ++ ] = nodePos.y();
         ropePositions[ indexFloat ++ ] = nodePos.z();
     }
-indexFloat = 0;
-     var node = nodes1.at( i );
-     var nodePos = node.get_m_x();
-     ropePositions1[ indexFloat ++ ] = nodePos.x();
-     ropePositions1[ indexFloat ++ ] = nodePos.y();
-     ropePositions1[ indexFloat ++ ] = nodePos.z();
-
+    indexFloat = 0;
+    for ( var i = 0; i < numVerts1; i ++ ) {
+        var node = nodes1.at( i );
+        var nodePos = node.get_m_x();
+        ropePositions1[ indexFloat ++ ] = nodePos.x();
+        ropePositions1[ indexFloat ++ ] = nodePos.y();
+        ropePositions1[ indexFloat ++ ] = nodePos.z();
+    }
     indexFloat = 0;
     for ( var i = 0; i < numVerts2; i ++ ) {
         var node = nodes2.at( i );
@@ -667,7 +689,7 @@ indexFloat = 0;
         ropePositions2[ indexFloat ++ ] = nodePos.y();
         ropePositions2[ indexFloat ++ ] = nodePos.z();
     }
-    
+
     indexFloat = 0;
     for ( var i = 0; i < numVerts3; i ++ ) {
         var node = nodes3.at( i );
@@ -684,7 +706,7 @@ indexFloat = 0;
         ropePositions4[ indexFloat ++ ] = nodePos.y();
         ropePositions4[ indexFloat ++ ] = nodePos.z();
     }
-    
+
     indexFloat = 0;
     for ( var i = 0; i < numVerts5; i ++ ) {
         var node = nodes5.at( i );
@@ -695,12 +717,12 @@ indexFloat = 0;
     }
 
     topRope.geometry.attributes.position.needsUpdate = true;
- rope2.geometry.attributes.position.needsUpdate = true;
- rope3.geometry.attributes.position.needsUpdate = true;
- rope4.geometry.attributes.position.needsUpdate = true;
- rope5.geometry.attributes.position.needsUpdate = true;
- rope6.geometry.attributes.position.needsUpdate = true;
- 
+    rope2.geometry.attributes.position.needsUpdate = true;
+    rope3.geometry.attributes.position.needsUpdate = true;
+    rope4.geometry.attributes.position.needsUpdate = true;
+    rope5.geometry.attributes.position.needsUpdate = true;
+    rope6.geometry.attributes.position.needsUpdate = true;
+
     // Update rigid bodies
     for ( var i = 0, il = rigidBodies.length; i < il; i ++ ) {
         var objThree = rigidBodies[ i ];
@@ -712,7 +734,82 @@ indexFloat = 0;
             var q = transformAux1.getRotation();
             objThree.position.set( p.x(), p.y(), p.z() );
             objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
+            // audio1.play();
         }
+        
+        if( i >2 && i < 7){
+            find_collisions(objThree, i); 
+            //console.log(i)
+        } 
     }
  }
 
+function find_collisions(c1, i){
+    var c1x = c1.position.x
+    var c1z = c1.position.z
+    var c1y = c1.position.y
+    var a = i -3; 
+    
+    for( var j = 3; j < 7; j++){
+        //if( i != j){
+            var c2 = rigidBodies[ j ]
+            var c2x = c2.position.x
+            var c2z = c2.position.z
+            var c2y = c2.position.y
+            if(c1z == c2z && c1x == c2x ){
+                console.log(a)
+                //play audio
+                switch(a){
+                    case 0: 
+                        audio1.play();
+                        /*
+                        if (audio1.isPlaying == true){
+                            audio1.stop();
+                            audio1.play();
+                        } else{
+                            audio1.play();
+                        }
+                        */
+                    break; 
+                    case 1: 
+                        audio2.play();
+                    /*
+                        if (audio2.isPlaying == true){
+                            audio2.stop();
+                            audio2.play();
+                        } else{
+                            audio2.play();
+                        } 
+                        */
+                    break; 
+                    case 2: 
+                        audio3.play();
+                    /*
+                        if (audio3.isPlaying == true){
+                            audio3.stop();
+                            audio3.play();
+                        } else{
+                            audio3.play();
+                        }
+                        */
+                    break; 
+                    case 3: 
+                        audio4.play();
+                    /*
+                        if (audio4.isPlaying == true){
+                            audio4.stop();
+                            audio4.play();
+                        } else{
+                            audio4.play();
+                        }
+                
+                    */
+                    break; 
+                }   
+            //}
+        }
+
+    }
+
+
+}
