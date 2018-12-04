@@ -1,5 +1,5 @@
 var scene, camera, renderer;
-//var clock = THREE.Clock(true);
+var clock = THREE.Clock(true);
 
 // Physics variables
 var gravityConstant = - 9.8;
@@ -72,7 +72,7 @@ function init() {
     
     createObjects();
     
-    //initInput();
+    initInput();
     
     //TODO: Add Audio
     
@@ -390,7 +390,7 @@ function createObjects(){
     
     // Attach Rope 2 and Topper
     var influence = 1;
-    ropeSoftBody.appendAnchor( 0, chime3.userData.physicsBody, true, influence );
+    //ropeSoftBody.appendAnchor( 0, chime3.userData.physicsBody, true, influence );
     ropeSoftBody.appendAnchor( ropeNumSegments, topper.userData.physicsBody, true, influence );
     
     // Bottomm Chime Rope -> Rope 5
@@ -498,17 +498,29 @@ function createParalellepiped( sx, sy, sz, mass, pos, quat, material ) {
 
 function animate() {
     requestAnimationFrame( animate );
-    
-    render();
+    var time = Date.now();
+    /*
+    var windStrength = Math.cos( time / 7000 ) * 20 + 40;
+    windForce.set( Math.sin( time / 2000 ), Math.cos( time / 3000 ), Math.sin( time / 1000 ) )
+    windForce.normalize()
+    windForce.multiplyScalar( windStrength );
+    simulate( time );
+    */
+	render();
+    //stats.update();
 }
 
 function render() {
+    var deltaTime = clock.getDelta();
+    updatePhysics( deltaTime );
+    
+	//renderer.render( scene, camera );
     document.body.onkeyup = function(e){
         if (e.keyCode === 32 || e.key === ' '){
             // TODO: Add Wind
-            
-            var windStrength = document.getElementById("windStrength").value;
-            
+            //var windStrength = document.getElementById("windStrength").value;
+
+
             //topper.rotation.x = .2;
         }
     }
@@ -526,7 +538,7 @@ function updateLight(){
     directionalLight.lookAt(scene.position);
 }
 
-/*function initInput() {
+function initInput() {
     window.addEventListener( 'keydown', function ( event ) {
                             switch ( event.keyCode ) {
                             // Q
@@ -545,34 +557,34 @@ function updateLight(){
 }
 
 function updatePhysics( deltaTime ) {
- hinge.enableAngularMotor( true, 1.5 * armMovement, 50 );
- // Step world
- physicsWorld.stepSimulation( deltaTime, 10 );
- // Update rope
- var softBody = topRope.userData.physicsBody;
- var ropePositions = topRope.geometry.attributes.position.array;
- var numVerts = ropePositions.length / 3;
- var nodes = softBody.get_m_nodes();
- var indexFloat = 0;
- for ( var i = 0; i < numVerts; i ++ ) {
- var node = nodes.at( i );
- var nodePos = node.get_m_x();
- ropePositions[ indexFloat ++ ] = nodePos.x();
- ropePositions[ indexFloat ++ ] = nodePos.y();
- ropePositions[ indexFloat ++ ] = nodePos.z();
+    hinge.enableAngularMotor( true, 1.5 * armMovement, 50 );
+    // Step world
+    physicsWorld.stepSimulation( deltaTime, 10 );
+    // Update rope
+    var softBody = topRope.userData.physicsBody;
+    var ropePositions = topRope.geometry.attributes.position.array;
+    var numVerts = ropePositions.length / 3;
+    var nodes = softBody.get_m_nodes();
+    var indexFloat = 0;
+    for ( var i = 0; i < numVerts; i ++ ) {
+        var node = nodes.at( i );
+        var nodePos = node.get_m_x();
+        ropePositions[ indexFloat ++ ] = nodePos.x();
+        ropePositions[ indexFloat ++ ] = nodePos.y();
+        ropePositions[ indexFloat ++ ] = nodePos.z();
+    }
+    topRope.geometry.attributes.position.needsUpdate = true;
+    // Update rigid bodies
+    for ( var i = 0, il = rigidBodies.length; i < il; i ++ ) {
+        var objThree = rigidBodies[ i ];
+        var objPhys = objThree.userData.physicsBody;
+        var ms = objPhys.getMotionState();
+        if ( ms ) {
+            ms.getWorldTransform( transformAux1 );
+            var p = transformAux1.getOrigin();
+            var q = transformAux1.getRotation();
+            objThree.position.set( p.x(), p.y(), p.z() );
+            objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
+        }
+    }
  }
- topRope.geometry.attributes.position.needsUpdate = true;
- // Update rigid bodies
- for ( var i = 0, il = rigidBodies.length; i < il; i ++ ) {
- var objThree = rigidBodies[ i ];
- var objPhys = objThree.userData.physicsBody;
- var ms = objPhys.getMotionState();
- if ( ms ) {
- ms.getWorldTransform( transformAux1 );
- var p = transformAux1.getOrigin();
- var q = transformAux1.getRotation();
- objThree.position.set( p.x(), p.y(), p.z() );
- objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
- }
- }
- }*/
