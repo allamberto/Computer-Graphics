@@ -78,9 +78,6 @@ function init() {
     
     initInput();
     
-    //TODO: Add Audio
-    
-    
     // Renderer
     renderer = new THREE.WebGLRenderer( { antialias: true } );
     renderer.setPixelRatio( window.devicePixelRatio );
@@ -192,6 +189,9 @@ function createObjects(){
     topRope.castShadow = true;
     topRope.receiveShadow = true;
     scene.add( topRope );
+    
+    
+    // base
     
     var baseMaterial = new THREE.MeshPhongMaterial( { color: 0xffffff } );
     pos.set( ropePos.x, 0.1, ropePos.z - armLength );
@@ -339,13 +339,15 @@ function createObjects(){
     
     // Left Chime -> Chime 1
     var chimeMass1 = 2.7;
-    chime1 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 2.6, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    //chime1 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 2.6, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    material = new THREE.MeshPhongMaterial( { color: 0x11111 } );
+    pos.set( ropePos.x, ropePos.y - ropeLength - .5, 0 );
+    quat.set( 0, 0, 0, 1 );
+    chime1 = createParalellepiped(.35, 2.8, .35, chimeMass2, pos, quat, material);
     chime1.castShadow = true;
     chime1.receiveShadow = true;
     var chimeShape1 = new Ammo.btCylinderShape( 3 );
     chimeShape1.setMargin( margin );
-    pos.set( ropePos.x, ropePos.y - ropeLength - .5, 0 );
-    quat.set( 0, 0, 0, 1 );
     createRigidBody( chime1, chimeShape1, chimeMass1, pos, quat );
     chime1.userData.physicsBody.setFriction( 0.5 );
 
@@ -396,13 +398,15 @@ function createObjects(){
     // Right Chime -> Chime 2
 
     var chimeMass2 = 2;
-    chime2 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 2.3, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    //chime2 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 2.3, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    pos.set( ropePos.x, ropePos.y - ropeLength - .35, 0 );
+    quat.set( 0, 0, 0, 1 );
+    material = new THREE.MeshPhongMaterial( { color: 0x11111 } );
+    chime2 = createParalellepiped(.35, 2.5, .35, chimeMass2, pos, quat, material);
     chime2.castShadow = true;
     chime2.receiveShadow = true;
     var chimeShape2 = new Ammo.btCylinderShape( chimeMass2 );
     chimeShape2.setMargin( margin );
-    pos.set( ropePos.x, ropePos.y - ropeLength - .35, 0 );
-    quat.set( 0, 0, 0, 1 );
     createRigidBody( chime2, chimeShape2, chimeMass2, pos, quat );
     chime2.userData.physicsBody.setFriction( 0.5 );
 
@@ -455,14 +459,16 @@ function createObjects(){
     // Top Chime -> Chime 3
 
     var chimeMass3 = 2.9;
-    chime3 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 3.8, 3.8), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    pos.set( ropePos.x, ropePos.y - 1.8, ropePos.z );
+    quat.set( 0, 0, 0, 1 );
+    material = new THREE.MeshPhongMaterial( { color: 0x11111 } );
+    //chime3 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 3.8, 3.8), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    chime3 = createParalellepiped(.35, 3.6, .35, chimeMass3, pos, quat, material);
     chime3.castShadow = true;
     chime3.receiveShadow = true;
     var chimeShape3 = new Ammo.btCylinderShape( chimeMass3 );
     chimeShape3.setMargin( margin );
-    pos.set( ropePos.x, ropePos.y - 1.8, ropePos.z );
-    quat.set( 0, 0, 0, 1 );
-    createRigidBody( chime3, chimeShape3, chimeMass3, pos, quat );
+    //createRigidBody( chime3, chimeShape3, chimeMass3, pos, quat );
     chime3.userData.physicsBody.setFriction( 0.5 );
 
     // Attach Rope 2 and Topper
@@ -514,14 +520,18 @@ function createObjects(){
     // Top Chime -> Chime 4
     
     var chimeMass4 = 2.5;
-    chime4 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 3, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    pos.set( ropePos.x, ropePos.y - 1.4, ropePos.z );
+    quat.set( 0, 0, 0, 1 );
+    material = new THREE.MeshPhongMaterial( { color: 0x11111 } );
+    //chime4 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 3, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    chime4 = createParalellepiped(.35, 3, .35, chimeMass4, pos, quat, material)
     chime4.castShadow = true;
     chime4.receiveShadow = true;
     var chimeShape4 = new Ammo.btCylinderShape( chimeMass4 );
     chimeShape4.setMargin( margin );
-    pos.set( ropePos.x, ropePos.y - 1.4, ropePos.z );
-    quat.set( 0, 0, 0, 1 );
-    createRigidBody( chime4, chimeShape4, chimeMass4, pos, quat );
+    //pos.set( ropePos.x, ropePos.y - 1.4, ropePos.z );
+    //quat.set( 0, 0, 0, 1 );
+    //createRigidBody( chime4, chimeShape4, chimeMass4, pos, quat );
     chime4.userData.physicsBody.setFriction( 0.5 );
     
     
