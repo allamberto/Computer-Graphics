@@ -289,7 +289,7 @@ function createObjects(){
     quat.set( 0, 0, 0, 1 );
     createRigidBody( ball, ballShape, ballMass, pos, quat );
     ball.userData.physicsBody.setFriction( 0.5 );
-    console.log(rigidBodies.length)
+    //console.log(rigidBodies.length)
     
     // Attach Rope 6 and Topper
     var influence = 1;
@@ -757,68 +757,48 @@ function updatePhysics( deltaTime ) {
 function find_collisions(c1, i){
     var c1x = c1.position.x
     var c1z = c1.position.z
-    var c1y = c1.position.y
     var a = i -3; 
     
-    for( var j = 3; j < 7; j++){
-        //if( i != j){
+    for( var j = 2; j < 7; j++){
+        if( i != j){
             var c2 = rigidBodies[ j ]
             var c2x = c2.position.x
             var c2z = c2.position.z
-            var c2y = c2.position.y
-            if(c1z == c2z && c1x == c2x ){
-                console.log(a)
+            if(c1z == c2z && c1x == c2x){
+                //console.log(a)
                 //play audio
                 switch(a){
                     case 0: 
-                        audio1.play();
-                        /*
-                        if (audio1.isPlaying == true){
-                            audio1.stop();
-                            audio1.play();
+                        if(audio1.isPlaying == true){
+                            break; 
                         } else{
                             audio1.play();
                         }
-                        */
                     break; 
                     case 1: 
-                        audio2.play();
-                    /*
-                        if (audio2.isPlaying == true){
-                            audio2.stop();
+                        if(audio2.isPlaying == true){
+                            break; 
+                        } else { 
                             audio2.play();
-                        } else{
-                            audio2.play();
-                        } 
-                        */
+                        }  
                     break; 
                     case 2: 
-                        audio3.play();
-                    /*
-                        if (audio3.isPlaying == true){
-                            audio3.stop();
-                            audio3.play();
-                        } else{
+                        if(audio3.isPlaying == true){
+                            break;
+                        } else{ 
                             audio3.play();
                         }
-                        */
                     break; 
                     case 3: 
-                        audio4.play();
-                    /*
-                        if (audio4.isPlaying == true){
-                            audio4.stop();
-                            audio4.play();
+                        if(audio4.isPlaying == true){
+                            break; 
                         } else{
                             audio4.play();
                         }
-                
-                    */
                     break; 
-                }   
-            //}
+                }  
+            }
         }
-
     }
 
 
