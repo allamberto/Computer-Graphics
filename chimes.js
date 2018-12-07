@@ -10,9 +10,10 @@ var softBodySolver;
 var physicsWorld;
 var rigidBodies = [];
 var margin = 0.05;
-var hinge;
+var hinge, hinge2;
 var rope;
 var armMovement = 0;
+var topperMovement = 0;
 var chime1, chime2, chime3, chime4, ball;
 var topperMass, topperRadius, topper;
 var transformAux1;
@@ -35,7 +36,9 @@ var controls;
 var directionalLight;
 
 var audioLoader, listner;
-var audio1, audio2, audio3, audio4; 
+var audio1, audio2, audio3, audio4, audio5;
+
+var windStrength;
 
 function init() {
     clock = new THREE.Clock();
@@ -73,6 +76,7 @@ function init() {
     scene.add(directionalLight);
 
     initPhysics();
+    windStrength = document.getElementById("WS").value;
     
     createObjects();
     
@@ -146,17 +150,20 @@ function createObjects(){
     
     
     // Topper
-    topperMass = 4;
+    topperMass = 5;
     topperRadius = 1.5;
-    topper = new THREE.Mesh( new THREE.CylinderBufferGeometry(topperRadius, topperRadius, .1, 0), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    pos.set( - 3, 5.8, 0 );
+    quat.set( 0, 0, 0, 1 );
+    material = new THREE.MeshPhongMaterial( { color: 0x593C1F } );
+    //topper = new THREE.Mesh( new THREE.CylinderBufferGeometry(topperRadius, topperRadius, .1, 0), new THREE.MeshPhongMaterial( { color: 0xE4F6F8 } ) );
+    topper = createParalellepiped( 2.2, 0.1, 2.2, topperMass, pos, quat, material );
     topper.castShadow = true;
     topper.receiveShadow = true;
     var topperShape = new Ammo.btCylinderShape( topperRadius );
     topperShape.setMargin( margin );
-    pos.set( - 3, 5.6, 0 );
-    quat.set( 0, 0, 0, 1 );
     createRigidBody( topper, topperShape, topperMass, pos, quat );
     topper.userData.physicsBody.setFriction( 0.5 );
+
     
     // Arm Holding Chimes
     var armMass = 2;
@@ -168,8 +175,6 @@ function createObjects(){
     ropeLength = 1.2;
     ropeMass = 2;
     ropePos = topper.position.clone();
-    //ropePos = 6;
-    //ropePos.y -= topperRadius + 1.5;
     ropePos.y = pylonHeight - ropeLength;
     segmentLength = ropeLength / ropeNumSegments;
     ropeGeometry = new THREE.BufferGeometry();
@@ -189,7 +194,6 @@ function createObjects(){
     topRope.castShadow = true;
     topRope.receiveShadow = true;
     scene.add( topRope );
-    
     
     // base
     
@@ -233,6 +237,14 @@ function createObjects(){
     var axis = new Ammo.btVector3( 0, 1, 0 );
     hinge = new Ammo.btHingeConstraint( pylon.userData.physicsBody, arm.userData.physicsBody, pivotA, pivotB, axis, axis, true );
     physicsWorld.addConstraint( hinge, true );
+    
+    // Hinge constraint to move the topper
+    pivotA = new Ammo.btVector3( 0, pylonHeight * 0.2, -1.9 );
+    pivotB = new Ammo.btVector3( 0, topper.position.y, topper.position.z );
+    axis = new Ammo.btVector3( 0, 0, 1 );
+    hinge2 = new Ammo.btHingeConstraint( topper.userData.physicsBody, topRope.userData.physicsBody, pivotA, pivotB, axis, axis, true );
+    //physicsWorld.addConstraint( hinge2, true );
+
     
     
     // Middle Ball Rope
@@ -280,7 +292,7 @@ function createObjects(){
     
     var ballMass = 6;
     var ballRadius = 0.4;
-    ball = new THREE.Mesh( new THREE.SphereGeometry( ballRadius, 20, 20), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    ball = new THREE.Mesh( new THREE.SphereGeometry( ballRadius, 20, 20), new THREE.MeshPhongMaterial( { color: 0x593C1F } ) );
     ball.castShadow = true;
     ball.receiveShadow = true;
     var ballShape = new Ammo.btSphereShape( ballRadius );
@@ -289,7 +301,6 @@ function createObjects(){
     quat.set( 0, 0, 0, 1 );
     createRigidBody( ball, ballShape, ballMass, pos, quat );
     ball.userData.physicsBody.setFriction( 0.5 );
-    //console.log(rigidBodies.length)
     
     // Attach Rope 6 and Topper
     var influence = 1;
@@ -338,18 +349,18 @@ function createObjects(){
     ropeSoftBody.setActivationState( 4 );
     
     // Left Chime -> Chime 1
-    var chimeMass1 = 2.7;
-    //chime1 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 2.6, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
-    material = new THREE.MeshPhongMaterial( { color: 0x11111 } );
+    var chimeMass1 = 3;
+    material = new THREE.MeshPhongMaterial( { color: 0xd3d3d3 } );
     pos.set( ropePos.x, ropePos.y - ropeLength - .5, 0 );
     quat.set( 0, 0, 0, 1 );
-    chime1 = createParalellepiped(.35, 2.8, .35, chimeMass2, pos, quat, material);
+    chime1 = createParalellepiped(.35, 2.8, .35, chimeMass1, pos, quat, material);
     chime1.castShadow = true;
     chime1.receiveShadow = true;
     var chimeShape1 = new Ammo.btCylinderShape( 3 );
     chimeShape1.setMargin( margin );
-    createRigidBody( chime1, chimeShape1, chimeMass1, pos, quat );
     chime1.userData.physicsBody.setFriction( 0.5 );
+ 
+
 
     // Attach Rope 2 and Topper
     var influence = 1;
@@ -397,17 +408,15 @@ function createObjects(){
     
     // Right Chime -> Chime 2
 
-    var chimeMass2 = 2;
-    //chime2 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 2.3, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    var chimeMass2 = 3;
     pos.set( ropePos.x, ropePos.y - ropeLength - .35, 0 );
     quat.set( 0, 0, 0, 1 );
-    material = new THREE.MeshPhongMaterial( { color: 0x11111 } );
+    material = new THREE.MeshPhongMaterial( { color: 0xe0e0e0 } );
     chime2 = createParalellepiped(.35, 2.5, .35, chimeMass2, pos, quat, material);
     chime2.castShadow = true;
     chime2.receiveShadow = true;
     var chimeShape2 = new Ammo.btCylinderShape( chimeMass2 );
     chimeShape2.setMargin( margin );
-    createRigidBody( chime2, chimeShape2, chimeMass2, pos, quat );
     chime2.userData.physicsBody.setFriction( 0.5 );
 
     // Attach Rope 3 and Topper
@@ -458,23 +467,22 @@ function createObjects(){
     
     // Top Chime -> Chime 3
 
-    var chimeMass3 = 2.9;
-    pos.set( ropePos.x, ropePos.y - 1.8, ropePos.z );
+    var chimeMass3 = 3;
+    pos.set( ropePos.x, ropePos.y - 1.4, ropePos.z );
     quat.set( 0, 0, 0, 1 );
-    material = new THREE.MeshPhongMaterial( { color: 0x11111 } );
-    //chime3 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 3.8, 3.8), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
-    chime3 = createParalellepiped(.35, 3.6, .35, chimeMass3, pos, quat, material);
+    material = new THREE.MeshPhongMaterial( { color: 0xe0e0e0 } );
+    chime3 = createParalellepiped(.35, 3, .35, chimeMass3, pos, quat, material);
     chime3.castShadow = true;
     chime3.receiveShadow = true;
     var chimeShape3 = new Ammo.btCylinderShape( chimeMass3 );
     chimeShape3.setMargin( margin );
-    //createRigidBody( chime3, chimeShape3, chimeMass3, pos, quat );
     chime3.userData.physicsBody.setFriction( 0.5 );
 
     // Attach Rope 2 and Topper
     var influence = 1;
     ropeSoftBody.appendAnchor( 0, chime3.userData.physicsBody, true, influence );
     ropeSoftBody.appendAnchor( ropeNumSegments, topper.userData.physicsBody, true, influence );
+   
     // Bottomm Chime Rope -> Rope 5
     
     ropeLength = .8;
@@ -519,19 +527,15 @@ function createObjects(){
     
     // Top Chime -> Chime 4
     
-    var chimeMass4 = 2.5;
+    var chimeMass4 = 3;
     pos.set( ropePos.x, ropePos.y - 1.4, ropePos.z );
     quat.set( 0, 0, 0, 1 );
-    material = new THREE.MeshPhongMaterial( { color: 0x11111 } );
-    //chime4 = new THREE.Mesh( new THREE.CylinderGeometry(.3, .3, 3, 3), new THREE.MeshPhongMaterial( { color: 0x11111 } ) );
+    material = new THREE.MeshPhongMaterial( { color: 0xe0e0e0 } );
     chime4 = createParalellepiped(.35, 3, .35, chimeMass4, pos, quat, material)
     chime4.castShadow = true;
     chime4.receiveShadow = true;
     var chimeShape4 = new Ammo.btCylinderShape( chimeMass4 );
     chimeShape4.setMargin( margin );
-    //pos.set( ropePos.x, ropePos.y - 1.4, ropePos.z );
-    //quat.set( 0, 0, 0, 1 );
-    //createRigidBody( chime4, chimeShape4, chimeMass4, pos, quat );
     chime4.userData.physicsBody.setFriction( 0.5 );
     
     
@@ -559,6 +563,11 @@ function createObjects(){
         audio4.setBuffer( buffer );
         chime4.add( audio4 );
     });
+    audioLoader.load( 'sounds/wind.ogg', function ( buffer ) {
+                     audio5 = new THREE.PositionalAudio( listener );
+                     audio5.setBuffer( buffer );
+                     topper.add( audio5 );
+                     });
 }
 
 // Taken from three.JS Physics Rope Example
@@ -599,15 +608,6 @@ function animate() {
 }
 
 function render() {
-    document.body.onkeyup = function(e){
-        if (e.keyCode === 32 || e.key === ' '){
-            // TODO: Add Wind
-            
-            var windStrength = document.getElementById("windStrength").value;
-            
-            //topper.rotation.x = .2;
-        }
-    }
     
     var deltaTime = clock.getDelta();
     updatePhysics( deltaTime );
@@ -627,25 +627,26 @@ function updateLight(){
 function initInput() {
     window.addEventListener( 'keydown', function ( event ) {
                             switch ( event.keyCode ) {
-                            // Q
-                            case 81:
-                            armMovement = 1;
-                            break;
-                            // A
-                            case 65:
-                            armMovement = - 1;
+                            //space
+                            case 32:
+                            audio5.play();
+                            topperMovement = 1;
                             break;
                             }
                             }, false );
     window.addEventListener( 'keyup', function () {
                             armMovement = 0;
+                            topperMovement = 0;
                             }, false );
 }
 
 function updatePhysics( deltaTime ) {
     physicsWorld.stepSimulation( deltaTime, 10 );
     // Hinge control
-    hinge.enableAngularMotor( true, 1.5 * armMovement, 50 );
+    windStrength = document.getElementById("WS").value;
+    console.log(-1 * (camera.position.x/Math.abs(camera.position.x)));
+    hinge.enableAngularMotor( true, 1.5 * windStrength * -1 * camera.position.x/Math.abs(camera.position.x) * topperMovement, 50 );
+    hinge2.enableAngularMotor( true, 10 * topperMovement, 50 );
     // Update rope
     var softBody = topRope.userData.physicsBody;
     var softBody1 = rope2.userData.physicsBody;
@@ -744,12 +745,10 @@ function updatePhysics( deltaTime ) {
             var q = transformAux1.getRotation();
             objThree.position.set( p.x(), p.y(), p.z() );
             objThree.quaternion.set( q.x(), q.y(), q.z(), q.w() );
-            // audio1.play();
         }
         
         if( i >2 && i < 7){
-            find_collisions(objThree, i); 
-            //console.log(i)
+            find_collisions(objThree, i);
         } 
     }
  }
@@ -764,8 +763,7 @@ function find_collisions(c1, i){
             var c2 = rigidBodies[ j ]
             var c2x = c2.position.x
             var c2z = c2.position.z
-            if(c1z == c2z && c1x == c2x){
-                //console.log(a)
+            if((c1z < c2z + .7) && (c1z > c2z - .7) && (c1x > c2x - .7) && (c1x < c2x + .7)){
                 //play audio
                 switch(a){
                     case 0: 
