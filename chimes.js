@@ -10,7 +10,7 @@ var softBodySolver;
 var physicsWorld;
 var rigidBodies = [];
 var margin = 0.05;
-var hinge, hinge2;
+var hinge;
 var rope;
 var armMovement = 0;
 var topperMovement = 0;
@@ -38,11 +38,24 @@ var directionalLight;
 var audioLoader, listner;
 var audio1, audio2, audio3, audio4, audio5;
 
+var wind;
+
 var windStrength;
+var pos;
+var quat;
+var clickRequest = false;
+var mouseCoords;
+var raycaster;
 
 function init() {
+    
+    pos = new THREE.Vector3();
+    quat = new THREE.Quaternion();
     clock = new THREE.Clock();
     transformAux1 = new Ammo.btTransform();
+    mouseCoords = new THREE.Vector2();
+    raycaster = new THREE.Raycaster();
+    
     var overlay = document.getElementById( 'overlay' );
     overlay.remove();
     var container = document.getElementById( 'container' );
@@ -74,9 +87,8 @@ function init() {
     directionalLight.visible = true;
     directionalLight.name = 'dirLight';
     scene.add(directionalLight);
-
+    
     initPhysics();
-    windStrength = document.getElementById("WS").value;
     
     createObjects();
     
@@ -125,8 +137,6 @@ function initPhysics() {
 function createObjects(){
     // Physics Variables
     var loader = new THREE.TextureLoader();
-    var pos = new THREE.Vector3();
-    var quat = new THREE.Quaternion();
     
     // audio
     audioLoader = new THREE.AudioLoader();
@@ -238,15 +248,6 @@ function createObjects(){
     hinge = new Ammo.btHingeConstraint( pylon.userData.physicsBody, arm.userData.physicsBody, pivotA, pivotB, axis, axis, true );
     physicsWorld.addConstraint( hinge, true );
     
-    // Hinge constraint to move the topper
-    pivotA = new Ammo.btVector3( 0, pylonHeight * 0.2, -1.9 );
-    pivotB = new Ammo.btVector3( 0, topper.position.y, topper.position.z );
-    axis = new Ammo.btVector3( 0, 0, 1 );
-    hinge2 = new Ammo.btHingeConstraint( topper.userData.physicsBody, topRope.userData.physicsBody, pivotA, pivotB, axis, axis, true );
-    //physicsWorld.addConstraint( hinge2, true );
-
-    
-    
     // Middle Ball Rope
     
     ropeLength = 2;
@@ -254,7 +255,7 @@ function createObjects(){
     ropePos.y -= 2;
     segmentLength = ropeLength / ropeNumSegments;
     ropeGeometry = new THREE.BufferGeometry();
-    ropeMaterial = new THREE.LineBasicMaterial( { color: 0x000000 } );
+    ropeMaterial = new THREE.LineBasicMaterial( { color: 0x0000ff } );
     ropePositions = [];
     ropeIndices = [];
     for ( var i = 0; i < ropeNumSegments + 1; i ++ ) {
@@ -591,6 +592,7 @@ function createRigidBody( threeObject, physicsShape, mass, pos, quat ) {
         body.setActivationState( 4 );
     }
     physicsWorld.addRigidBody( body );
+    return body;
 }
 
 // Taken from three.JS Physics Rope Example
@@ -611,6 +613,7 @@ function render() {
     
     var deltaTime = clock.getDelta();
     updatePhysics( deltaTime );
+    processClick();
     renderer.render( scene, camera );
     
     
@@ -624,29 +627,66 @@ function updateLight(){
     directionalLight.lookAt(scene.position);
 }
 
+
 function initInput() {
+				window.addEventListener( 'mousedown', function ( event ) {
+                                        if ( ! clickRequest ) {
+                                        mouseCoords.set(
+                                                        ( event.clientX / window.innerWidth ) * 2 - 1,
+                                                        - ( event.clientY / window.innerHeight ) * 2 + 1.6
+                                                        );
+                                        clickRequest = true;
+                                        }
+                                        }, false );
+    
     window.addEventListener( 'keydown', function ( event ) {
                             switch ( event.keyCode ) {
-                            //space
-                            case 32:
-                            audio5.play();
-                            topperMovement = 1;
+                            // Q
+                            case 81:
+                            armMovement = 1;
+                            break;
+                            // A
+                            case 65:
+                            armMovement = - 1;
                             break;
                             }
                             }, false );
     window.addEventListener( 'keyup', function () {
                             armMovement = 0;
-                            topperMovement = 0;
                             }, false );
+}
+
+function processClick() {
+				if ( clickRequest ) {
+                    
+                    var windMaterial = new THREE.MeshPhongMaterial( { color: 0x0000ff, transparent: true, opacity: 0.0 } );
+                    raycaster.setFromCamera( mouseCoords, camera );
+                    windStrength = document.getElementById("WS").value;
+                   
+                    
+                    // Creates a wind
+                    var windMass = 3;
+                    var windRadius = windStrength;
+                    var wind = new THREE.Mesh( new THREE.SphereBufferGeometry( windRadius, 18, 16 ), windMaterial );
+                    var windShape = new Ammo.btSphereShape( windRadius );
+                    windShape.setMargin( margin );
+                    pos.copy( raycaster.ray.direction );
+                    pos.add( raycaster.ray.origin );
+                    quat.set( 0, 0, 0, 1 );
+                    var windBody = createRigidBody( wind, windShape, windMass, pos, quat );
+                    windBody.setFriction( 0.5 );
+                    pos.copy( raycaster.ray.direction );
+                    pos.multiplyScalar( 14 );
+                    windBody.setLinearVelocity( new Ammo.btVector3( pos.x, pos.y, pos.z) );
+                    clickRequest = false;
+                }
 }
 
 function updatePhysics( deltaTime ) {
     physicsWorld.stepSimulation( deltaTime, 10 );
     // Hinge control
-    windStrength = document.getElementById("WS").value;
-    console.log(-1 * (camera.position.x/Math.abs(camera.position.x)));
-    hinge.enableAngularMotor( true, 1.5 * windStrength * -1 * camera.position.x/Math.abs(camera.position.x) * topperMovement, 50 );
-    hinge2.enableAngularMotor( true, 10 * topperMovement, 50 );
+    hinge.enableAngularMotor( true, 1.5 * armMovement, 50 );
+    
     // Update rope
     var softBody = topRope.userData.physicsBody;
     var softBody1 = rope2.userData.physicsBody;

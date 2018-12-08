@@ -65,17 +65,17 @@
                 <button id="startButton" onclick="init()">Click to Play</button>
             </div>
         </div>
-        <div id="container">
-            <div style="background-color:#000;">
-                <div class="inline" style="float: left;">
-                    <p style="text-align:center;">Wind Strength</p>
-                    <input style="padding-left: 20px;" type="range" min="0" max="10" value="0" step=".1" id="WS">
-                </div>
-                <div class="inline" style="float: right;">
-                    <p style="text-align:center;">Time of Day</p>
-                    <input style="padding-right: 10px;" type="range" min="0" max="12" value="12" step="1" id="time" onchange="updateLight()">
-                </div>
-            <div>
-        </div>
+            <div id="container" style="text-align:center;background-color: #cce0ff;">
+            <div class="inline" id="info" style="text-align:center;">Ammo.js Wind Chimes<br>Click to Blow Wind in Direction of Mouse<br>- OR -<br>Press Q or A to Move the Arm</div>
+            <div class="inline" style="float: left;">
+                <p style="text-align:center;">Wind Strength</p>
+                <input style="padding-left: 20px;" type="range" min=".1" max=".6" value="0" step=".07" id="WS">
+            </div>
+            <div class="inline" style="float: right;">
+                <p style="text-align:center;">Time of Day</p>
+                <input style="padding-right: 10px;" type="range" min="0" max="12" value="12" step="1" id="time" onchange="updateLight()">
+            </div>
+            </div>
+        
     </body>
 </html>
