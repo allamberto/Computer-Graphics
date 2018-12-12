@@ -788,12 +788,12 @@ function updatePhysics( deltaTime ) {
         }
         
         if( i >2 && i < 7){
-            find_collisions(objThree, i);
+            findCollisions(objThree, i);
         } 
     }
  }
 
-function find_collisions(c1, i){
+function findCollisions(c1, i){
     var c1x = c1.position.x
     var c1z = c1.position.z
     var a = i -3; 
