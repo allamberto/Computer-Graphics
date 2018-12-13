@@ -93,8 +93,8 @@ function init() {
     var container = document.getElementById( 'container' );
     scene = new THREE.Scene;
     
-    scene.background = new THREE.Color( 0xcce0ff );
-    scene.fog = new THREE.Fog( 0xcce0ff, 30, 1000 );
+    scene.background = new THREE.Color( 0xc7dbf9 );
+    scene.fog = new THREE.Fog( 0xc7dbf9, 30, 1000 );
     
     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.2, 2000 );
     camera.position.set( - 7, 5, 8 );
@@ -683,14 +683,45 @@ function updateLight(){
 	} else if (time==12) {
 		time = 11.5;
 	}
-	bulbLight.distance = (6-Math.abs(time-6))*500;
 	
-	//bulbLight.color = 0xff8888;
+	scene.remove(bulbLight);
 	
+	var light_color = 0xffee88;
+	var sky_color = 0xc7dbf9;
+	if (time<1 || time>11) {
+		light_color = 0xff3838;
+		sky_color = 0xa9b7ce;
+	} else if (time<2 || time>10) {
+		light_color = 0xff4444;
+		sky_color = 0xa5b5ce;
+	} else if (time<3 || time>9) {
+		light_color = 0xff6638;
+		sky_color = 0xafc0db;
+	} else if (time<4 || time>8) {
+		light_color = 0xff8c3a;
+		sky_color = 0xb7cae8;
+	} else if (time<5 || time>7) {
+		light_color = 0xff9539;
+		sky_color = 0xc1d5f4;
+	}
+	
+	//scene.background = new THREE.Color( 0xcce0ff );
+	scene.background = new THREE.Color( sky_color );
+    scene.fog = new THREE.Fog( sky_color, 30, 1000 );
+	
+	var bulbGeometry = new THREE.SphereBufferGeometry( 10 , 16, 8 );
+	bulbLight = new THREE.PointLight( light_color, 1, 0, 2 );
+	bulbLight.add( new THREE.Mesh( bulbGeometry, bulbMat ) );
+	bulbLight.position.set( (6*(1000/24) - 250)/4, 50, 0 );
+	bulbLight.castShadow = true;
+	bulbLight.decay = 2;
+	bulbLight.power = 500;
+	scene.add( bulbLight );
+	
+	bulbLight.distance = (6-Math.abs(time-6))*500;	
 	bulbLight.position.x = (time*(1000/24) - 250)/2;
 	
     directionalLight.position.copy(new THREE.Vector3(70, 40, 50));
-
     directionalLight.lookAt(scene.position);
 }
 
