@@ -40,6 +40,38 @@ var audio1, audio2, audio3, audio4, audio5;
 
 var wind;
 
+var bulbLuminousPowers = {
+	"110000 lm (1000W)": 110000,
+	"3500 lm (300W)": 3500,
+	"1700 lm (100W)": 1700,
+	"800 lm (60W)": 800,
+	"400 lm (40W)": 400,
+	"180 lm (25W)": 180,
+	"20 lm (4W)": 20,
+	"Off": 0
+};
+var hemiLuminousIrradiances = {
+	"0.0001 lx (Moonless Night)": 0.0001,
+	"0.002 lx (Night Airglow)": 0.002,
+	"0.5 lx (Full Moon)": 0.5,
+	"3.4 lx (City Twilight)": 3.4,
+	"50 lx (Living Room)": 50,
+	"100 lx (Very Overcast)": 100,
+	"350 lx (Office Room)": 350,
+	"400 lx (Sunrise/Sunset)": 400,
+	"1000 lx (Overcast)": 1000,
+	"18000 lx (Daylight)": 18000,
+	"50000 lx (Direct Sun)": 50000
+};
+var previousShadowMap = false;
+var bulbLight;
+var params = {
+	shadows: true,
+	exposure: 0.68,
+	bulbPower: Object.keys( bulbLuminousPowers )[ 4 ],
+	hemiIrradiance: Object.keys( hemiLuminousIrradiances )[ 0 ]
+};
+
 var windStrength;
 var pos;
 var quat;
@@ -69,10 +101,20 @@ function init() {
     
     // lights
     
-    var hemiLight = new THREE.HemisphereLight( 0xcce0ff, 0x228B22, 1 );
-    hemiLight.position.copy(new THREE.Vector3(0, 500, 0));
-    
-    scene.add( hemiLight );
+	var bulbGeometry = new THREE.SphereBufferGeometry( 10 , 16, 8 );
+	bulbLight = new THREE.PointLight( 0xffee88, 1, 0, 2 );
+	bulbMat = new THREE.MeshStandardMaterial( {
+		emissive: 0xffffee,
+		emissiveIntensity: 10,
+		color: 0x000000
+	} );
+	bulbLight.add( new THREE.Mesh( bulbGeometry, bulbMat ) );
+	bulbLight.position.set( (6*(1000/24) - 250)/4, 50, 0 );
+	bulbLight.castShadow = true;
+	bulbLight.decay = 2;
+	bulbLight.power = 1000;
+	scene.add( bulbLight );
+	
     
     directionalLight = new THREE.DirectionalLight(0xffffff, .75);
     directionalLight.position.copy(new THREE.Vector3(70, 40, 50));
@@ -113,7 +155,10 @@ function init() {
     controls.update();
     
     window.addEventListener( 'resize', onWindowResize, false );
+	
     animate();
+	
+	
 }
 
 function onWindowResize() {
@@ -142,8 +187,7 @@ function createObjects(){
     audioLoader = new THREE.AudioLoader();
     listener = new THREE.AudioListener();
     camera.add( listener );
-     
-    
+         
     // Ground
     pos.set( 0, - 0.5, 0 );
     quat.set( 0, 0, 0, 1 );
@@ -614,6 +658,18 @@ function render() {
     var deltaTime = clock.getDelta();
     updatePhysics( deltaTime );
     processClick();
+	
+	renderer.toneMappingExposure = Math.pow( params.exposure, 5.0 ); // to allow for very bright scenes.
+	renderer.shadowMap.enabled = params.shadows;
+	bulbLight.castShadow = params.shadows;
+	if ( params.shadows !== previousShadowMap ) {
+		previousShadowMap = params.shadows;
+	}
+	//bulbLight.power = bulbLuminousPowers[ params.bulbPower ];
+	bulbMat.emissiveIntensity = bulbLight.intensity / Math.pow( 0.02, 2.0 ); // convert from intensity to irradiance at bulb surface
+	var time = Date.now() * 0.0005;
+	//bulbLight.position.y = Math.cos( time ) * 0.75 + 1.25;
+	
     renderer.render( scene, camera );
     
     
@@ -621,7 +677,18 @@ function render() {
 
 function updateLight(){
     var time = document.getElementById("time").value;
-
+	
+	if (time==0) {
+		time = 0.5;
+	} else if (time==12) {
+		time = 11.5;
+	}
+	bulbLight.distance = (6-Math.abs(time-6))*500;
+	
+	//bulbLight.color = 0xff8888;
+	
+	bulbLight.position.x = (time*(1000/24) - 250)/2;
+	
     directionalLight.position.copy(new THREE.Vector3(70, 40, 50));
 
     directionalLight.lookAt(scene.position);
